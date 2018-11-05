@@ -2413,6 +2413,28 @@ def localUsers(host, args, session):
 
     return output
 
+def setPassword(host, args, session):
+    """
+         Set user password
+         @param host: string, the hostname or IP address of the bmc
+         @param args: contains additional arguments used by the logging sub
+                command
+         @param session: the active session to use
+         @param args.json: boolean, if this flag is set to true, the output
+                will be provided in json format for programmatic consumption
+         @return: Session object
+    """
+    url = "https://" + host + "/xyz/openbmc_project/user/" + args.user + \
+        "/action/SetPassword"
+    httpHeader = {'Content-Type': 'application/json'}
+    try:
+        res = session.post(url, headers=httpHeader,
+                           json={"data": [args.password]}, verify=False,
+                           timeout=30)
+    except(requests.exceptions.Timeout):
+        return(connectionErrHandler(args.json, "Timeout", None))
+    return res.text
+
 def createCommandParser():
     """
          creates the parser for the command line along with help for each command and subcommand
@@ -2664,6 +2686,11 @@ def createCommandParser():
     parser_ldap_mapper_delete = parser_ldap_mapper_sub.add_parser("delete",help="Delete privilege mapping")
     parser_ldap_mapper_delete.add_argument("-g","--group_name",required=True,help="Group Name")
     parser_ldap_mapper_delete.set_defaults(func=deletePrivilegeMapping)
+
+    # set user password
+    parser_set_password = subparsers.add_parser("set_password", help="Set password of user")
+    parser_set_password.add_argument( "-p", "--password", required=True, help="Password of user")
+    parser_set_password.set_defaults(func=setPassword)
 
     return parser
 
