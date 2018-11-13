@@ -2185,6 +2185,8 @@ def enableLDAP(host, args, session):
     except(requests.exceptions.ConnectionError) as err:
         return connectionErrHandler(args.json, "ConnectionError", err)
 
+    time.sleep(5)
+
     return res.text
 
 def disableLDAP(host, args, session):
